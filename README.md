@@ -3,20 +3,13 @@ Package captcha
 
 	import "github.com/dchest/captcha"
 
-Package captcha implements generation and verification of image and audio
-CAPTCHAs.
+Package captcha implements generation and verification of image CAPTCHAs.
 
 A captcha solution is the sequence of digits 0-9 with the defined length.
-There are two captcha representations: image and audio.
+There is only one captcha representation: image.
 
 An image representation is a PNG-encoded image with the solution printed on
 it in such a way that makes it hard for computers to solve it using OCR.
-
-An audio representation is a WAVE-encoded (8 kHz unsigned 8-bit) sound with the
-spoken solution (currently in English, Russian, Chinese, and Japanese). To make
-it hard for computers to solve audio captcha, the voice that pronounces numbers
-has random speed and pitch, and there is a randomly generated background noise
-mixed into the sound.
 
 This package doesn't require external files or libraries to generate captcha
 representations; it is self-contained.
@@ -31,8 +24,8 @@ ids and solutions in database) by implementing Store interface and
 registering the object with SetCustomStore.
 
 Captchas are created by calling New, which returns the captcha id.  Their
-representations, though, are created on-the-fly by calling WriteImage or
-WriteAudio functions. Created representations are not stored anywhere, but
+representations, though, are created on-the-fly by calling WriteImage
+function. Created representations are not stored anywhere, but
 subsequent calls to these functions with the same id will write the same
 captcha solution. Reload function will create a new different solution for the
 provided captcha, allowing users to "reload" captcha if they can't solve the
@@ -40,7 +33,7 @@ displayed one without reloading the whole page.  Verify and VerifyString are
 used to verify that the given solution is the right one for the given captcha
 id.
 
-Server provides an http.Handler which can serve image and audio
+Server provides an http.Handler which can serve image
 representations of captchas automatically from the URL. It can also be used
 to reload captchas.  Refer to Server function documentation for details, or
 take a look at the example in "capexample" subdirectory.
@@ -50,8 +43,6 @@ Examples
 --------
 
 ![Image](https://github.com/dchest/captcha/raw/master/capgen/example.png)
-
-[Audio](https://github.com/dchest/captcha/raw/master/capgen/example.wav)
 
 
 Constants
@@ -121,36 +112,31 @@ solution.
 Reload generates and remembers new digits for the given captcha id.  This
 function returns false if there is no captcha with the given id.
 
-After calling this function, the image or audio presented to a user must be
-refreshed to show the new captcha representation (WriteImage and WriteAudio
+After calling this function, the image presented to a user must be
+refreshed to show the new captcha representation (WriteImage
 will write the new one).
 
 ### func Server
 
 	func Server(imgWidth, imgHeight int) http.Handler
 	
-Server returns a handler that serves HTTP requests with image or
-audio representations of captchas. Image dimensions are accepted as
+Server returns a handler that serves HTTP requests with image
+representations of captchas. Image dimensions are accepted as
 arguments. The server decides which captcha to serve based on the last URL
 path component: file name part must contain a captcha id, file extension —
-its format (PNG or WAV).
+its format (PNG).
 
 For example, for file name "LBm5vMjHDtdUfaWYXiQX.png" it serves an image captcha
-with id "LBm5vMjHDtdUfaWYXiQX", and for "LBm5vMjHDtdUfaWYXiQX.wav" it serves the
-same captcha in audio format.
+with id "LBm5vMjHDtdUfaWYXiQX".
 
 To serve a captcha as a downloadable file, the URL must be constructed in
 such a way as if the file to serve is in the "download" subdirectory:
-"/download/LBm5vMjHDtdUfaWYXiQX.wav".
+"/download/LBm5vMjHDtdUfaWYXiQX.png".
 
 To reload captcha (get a different solution for the same captcha id), append
 "?reload=x" to URL, where x may be anything (for example, current time or a
 random number to make browsers refetch an image instead of loading it from
 cache).
-
-By default, the Server serves audio in English language. To serve audio
-captcha in one of the other supported languages, append "lang" value, for
-example, "?lang=ru".
 
 ### func SetCustomStore
 
@@ -177,14 +163,6 @@ VerifyString is like Verify, but accepts a string of digits.  It removes
 spaces and commas from the string, but any other characters, apart from
 digits and listed above, will cause the function to return false.
 
-### func WriteAudio
-
-	func WriteAudio(w io.Writer, id string, lang string) error
-	
-WriteAudio writes WAV-encoded audio representation of the captcha with the
-given id and the given language. If there are no sounds for the given
-language, English is used.
-
 ### func WriteImage
 
 	func WriteImage(w io.Writer, id string, width, height int) error
@@ -195,36 +173,6 @@ given id. The image will have the given width and height.
 
 Types
 -----
-
-``` go
-type Audio struct {
-    // contains unexported fields
-}
-```
-
-
-### func NewAudio
-
-	func NewAudio(id string, digits []byte, lang string) *Audio
-	
-NewAudio returns a new audio captcha with the given digits, where each digit
-must be in range 0-9. Digits are pronounced in the given language. If there
-are no sounds for the given language, English is used.
-
-Possible values for lang are "en", "ja", "ru", "zh".
-
-### func (*Audio) EncodedLen
-
-	func (a *Audio) EncodedLen() int
-	
-EncodedLen returns the length of WAV-encoded audio captcha.
-
-### func (*Audio) WriteTo
-
-	func (a *Audio) WriteTo(w io.Writer) (n int64, err error)
-	
-WriteTo writes captcha audio in WAVE format into the given io.Writer, and
-returns the number of bytes written and an error if any.
 
 ``` go
 type Image struct {
