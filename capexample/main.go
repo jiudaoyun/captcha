@@ -64,43 +64,15 @@ function setSrcQuery(e, q) {
 	e.src = src + "?" + q
 }
 
-function playAudio() {
-	var le = document.getElementById("lang");
-	var lang = le.options[le.selectedIndex].value;
-	var e = document.getElementById('audio')
-	setSrcQuery(e, "lang=" + lang)
-	e.style.display = 'block';
-	e.autoplay = 'true';
-	return false;
-}
-
-function changeLang() {
-	var e = document.getElementById('audio')
-	if (e.style.display == 'block') {
-		playAudio();
-	}
-}
-
 function reload() {
 	setSrcQuery(document.getElementById('image'), "reload=" + (new Date()).getTime());
-	setSrcQuery(document.getElementById('audio'), (new Date()).getTime());
 	return false;
 }
 </script>
-<select id="lang" onchange="changeLang()">
-	<option value="en">English</option>
-	<option value="ja">Japanese</option>
-	<option value="ru">Russian</option>
-	<option value="zh">Chinese</option>
-</select>
 <form action="/process" method=post>
 <p>Type the numbers you see in the picture below:</p>
 <p><img id=image src="/captcha/{{.CaptchaId}}.png" alt="Captcha image"></p>
-<a href="#" onclick="reload()">Reload</a> | <a href="#" onclick="playAudio()">Play Audio</a>
-<audio id=audio controls style="display:none" src="/captcha/{{.CaptchaId}}.wav" preload=none>
-  You browser doesn't support audio.
-  <a href="/captcha/download/{{.CaptchaId}}.wav">Download file</a> to play it in the external player.
-</audio>
+<a href="#" onclick="reload()">Reload</a>
 <input type=hidden name=captchaId value="{{.CaptchaId}}"><br>
 <input name=captchaSolution>
 <input type=submit value=Submit>

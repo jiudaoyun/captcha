@@ -2,20 +2,13 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-// Package captcha implements generation and verification of image and audio
-// CAPTCHAs.
+// Package captcha implements generation and verification of image CAPTCHAs.
 //
 // A captcha solution is the sequence of digits 0-9 with the defined length.
-// There are two captcha representations: image and audio.
+// There is only one captcha representation: image.
 //
-// An image representation is a PNG-encoded image with the solution printed on
+// The image representation is a PNG-encoded image with the solution printed on
 // it in such a way that makes it hard for computers to solve it using OCR.
-//
-// An audio representation is a WAVE-encoded (8 kHz unsigned 8-bit) sound with
-// the spoken solution (currently in English, Russian, Chinese, and Japanese).
-// To make it hard for computers to solve audio captcha, the voice that
-// pronounces numbers has random speed and pitch, and there is a randomly
-// generated background noise mixed into the sound.
 //
 // This package doesn't require external files or libraries to generate captcha
 // representations; it is self-contained.
@@ -30,8 +23,8 @@
 // registering the object with SetCustomStore.
 //
 // Captchas are created by calling New, which returns the captcha id.  Their
-// representations, though, are created on-the-fly by calling WriteImage or
-// WriteAudio functions. Created representations are not stored anywhere, but
+// representations, though, are created on-the-fly by calling WriteImage
+// functions. Created representations are not stored anywhere, but
 // subsequent calls to these functions with the same id will write the same
 // captcha solution. Reload function will create a new different solution for
 // the provided captcha, allowing users to "reload" captcha if they can't solve
@@ -39,7 +32,7 @@
 // are used to verify that the given solution is the right one for the given
 // captcha id.
 //
-// Server provides an http.Handler which can serve image and audio
+// Server provides an http.Handler which can serve image
 // representations of captchas automatically from the URL. It can also be used
 // to reload captchas.  Refer to Server function documentation for details, or
 // take a look at the example in "capexample" subdirectory.
@@ -91,8 +84,8 @@ func NewLen(length int) (id string) {
 // Reload generates and remembers new digits for the given captcha id.  This
 // function returns false if there is no captcha with the given id.
 //
-// After calling this function, the image or audio presented to a user must be
-// refreshed to show the new captcha representation (WriteImage and WriteAudio
+// After calling this function, the image presented to a user must be
+// refreshed to show the new captcha representation (WriteImage
 // will write the new one).
 func Reload(id string) bool {
 	old := globalStore.Get(id, false)
@@ -111,18 +104,6 @@ func WriteImage(w io.Writer, id string, width, height int) error {
 		return ErrNotFound
 	}
 	_, err := NewImage(id, d, width, height).WriteTo(w)
-	return err
-}
-
-// WriteAudio writes WAV-encoded audio representation of the captcha with the
-// given id and the given language. If there are no sounds for the given
-// language, English is used.
-func WriteAudio(w io.Writer, id string, lang string) error {
-	d := globalStore.Get(id, false)
-	if d == nil {
-		return ErrNotFound
-	}
-	_, err := NewAudio(id, d, lang).WriteTo(w)
 	return err
 }
 
