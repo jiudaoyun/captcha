@@ -1,7 +1,7 @@
 Package captcha
 =====================
 
-	import "github.com/dchest/captcha"
+	import "github.com/jiudaoyun/captcha"
 
 Package captcha implements generation and verification of image CAPTCHAs.
 
@@ -42,7 +42,7 @@ take a look at the example in "capexample" subdirectory.
 Examples
 --------
 
-![Image](https://github.com/dchest/captcha/raw/master/capgen/example.png)
+![Image](https://github.com/jiudaoyun/captcha/raw/master/capgen/example.png)
 
 
 Constants
